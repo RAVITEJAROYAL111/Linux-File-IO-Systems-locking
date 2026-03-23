@@ -24,7 +24,7 @@ Execute the C Program for the desired output.
 #include <unistd.h> #include <sys/stat.h> #include <fcntl.h> #include <stdlib.h> #include <stdio.h>
 
 int main(int argc, char *argv[]) { if (argc != 3) { fprintf(stderr, "Usage: %s <source_file> <destination_file>\n", argv[0]); exit(EXIT_FAILURE); }
-
+```
 char block[1024];
 int in, out;
 ssize_t nread;
@@ -121,7 +121,7 @@ return 0;
 }
 
 
-
+```
 ## OUTPUT
 ![WhatsApp Image 2026-03-23 at 10 13 14 AM](https://github.com/user-attachments/assets/274a9da4-eaba-4c10-ac73-b33596d1c56e)
 
