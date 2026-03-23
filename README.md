@@ -70,14 +70,14 @@ return EXIT_SUCCESS;
 }
 
 
-
+```
 
 
 ## 2.To Write a C program that illustrates files locking
 #include <stdio.h> #include <fcntl.h> #include <unistd.h>
 
 int main() { int fd; struct flock lock;
-
+```
 fd = open("locked.txt", O_RDWR | O_CREAT, 0644);
 if (fd < 0)
 {
