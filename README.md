@@ -81,60 +81,89 @@ int main(int argc, char *argv[]) {
 
 
 ## 2.To Write a C program that illustrates files locking
-#include <stdio.h> #include <fcntl.h> #include <unistd.h>
 
-int main() { int fd; struct flock lock;
+
+
 ```
-fd = open("locked.txt", O_RDWR | O_CREAT, 0644);
-if (fd < 0)
-{
-    printf("Error opening file!\n");
-    return 1;
+
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/file.h>
+
+void display_lslocks() {
+    printf("\nCurrent `lslocks` output:\n");
+    fflush(stdout);
+    system("lslocks");
 }
 
-// Set write lock
-lock.l_type = F_WRLCK;
-lock.l_whence = SEEK_SET;
-lock.l_start = 0;
-lock.l_len = 0;
-lock.l_pid = getpid();
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
 
-printf("Locking file...\n");
+    char *file = argv[1];
+    int fd;
 
-if (fcntl(fd, F_SETLK, &lock) == -1)
-{
-    printf("File already locked by another process!\n");
+    printf("Opening %s\n", file);
+
+    fd = open(file, O_WRONLY);
+    if (fd == -1) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
+
+    // Acquire shared lock
+    if (flock(fd, LOCK_SH) == -1) {
+        perror("Error acquiring shared lock");
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+    printf("Acquired shared lock using flock\n");
+    display_lslocks();
+
+    sleep(1); // Simulate waiting before upgrading
+
+    // Try to upgrade to exclusive lock (non-blocking)
+    if (flock(fd, LOCK_EX | LOCK_NB) == -1) {
+        perror("Error upgrading to exclusive lock");
+        flock(fd, LOCK_UN); // Release shared lock if upgrade fails
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+    printf("Acquired exclusive lock using flock\n");
+    display_lslocks();
+
+    sleep(1); // Simulate waiting before unlocking
+
+    // Release lock
+    if (flock(fd, LOCK_UN) == -1) {
+        perror("Error unlocking");
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+    printf("Unlocked\n");
+    display_lslocks();
+
     close(fd);
-    return 1;
-}
-
-printf("File locked successfully!\n");
-
-// Write to file
-write(fd, "This is locked content", 23);
-printf("Data written to file\n");
-
-printf("Press Enter to unlock...");
-getchar();
-
-// Unlock file
-lock.l_type = F_UNLCK;
-fcntl(fd, F_SETLK, &lock);
-
-printf("File unlocked!\n");
-
-close(fd);
-return 0;
+    return 0;
 }
 
 
 ```
+
+
+
+
+
 ## OUTPUT
 
 ![Alt text](img7/image1.png)
-
-
-
+![Alt text](img7/image2.png)
+![Alt text](img7/image3.png)
+![Alt text](img7/image4.png)
 
 # RESULT:
 The programs are executed successfully.
